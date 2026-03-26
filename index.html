@@ -3,458 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador Visual Google - Custom Search API</title>
-    <!-- JSZip para la descarga masiva -->
+    <title>Buscador Escolar Pro - Final</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
             --primary: #4285f4;
-            --secondary: #34a853;
+            --success: #34a853;
             --error: #ea4335;
             --bg: #f8f9fa;
             --text: #202124;
-            --card-bg: #ffffff;
-            --separator: #dadce0;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text);
-            line-height: 1.6;
-            padding: 20px;
-        }
-
-        .container { max-width: 1200px; margin: 0 auto; }
-
-        /* Header y Configuración */
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { color: var(--primary); margin-bottom: 10px; }
-
-        .config-panel {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .config-panel summary { cursor: pointer; font-weight: bold; color: #5f6368; margin-bottom: 10px; }
-        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .input-group { display: flex; flex-direction: column; }
-        .input-group label { font-size: 0.85rem; margin-bottom: 5px; color: #5f6368; }
-        input, textarea { 
-            padding: 12px; 
-            border: 1px solid #dadce0; 
-            border-radius: 4px; 
-            font-size: 1rem;
-            outline: none;
-            width: 100%;
-        }
-        input:focus, textarea:focus { border-color: var(--primary); }
-
-        /* Buscador Multi-tema */
-        .search-container {
-            background: var(--card-bg);
-            padding: 20px;
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        
+        /* Pantalla de Bienvenida / Setup */
+        #setupScreen {
+            background: white;
+            padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-top: 50px;
         }
-        .search-container label { display: block; margin-bottom: 10px; font-weight: 600; color: #3c4043; }
-        .search-container textarea { min-height: 80px; resize: vertical; margin-bottom: 15px; }
-        .search-actions { display: flex; gap: 10px; align-items: center; }
+
+        .setup-card { max-width: 500px; margin: 0 auto; }
+        .setup-card h2 { color: var(--primary); margin-bottom: 20px; }
+        .setup-card p { font-size: 14px; color: #5f6368; margin-bottom: 25px; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(66,133,244,0.2); }
 
         .btn {
-            padding: 12px 25px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-primary { background: var(--primary); color: white; flex: 1; }
-        .btn-primary:hover { background: #3367d6; }
-        .btn-secondary { background: var(--secondary); color: white; }
-        .btn-download-all { background: #3c4043; color: white; }
-
-        /* Secciones por Tema */
-        .topic-section { margin-bottom: 50px; }
-        .topic-header { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            margin-bottom: 20px; 
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--primary);
-        }
-        .topic-header h2 { text-transform: capitalize; color: #3c4043; font-size: 1.4rem; }
-        .topic-badge { 
-            background: var(--primary); 
-            color: white; 
-            padding: 2px 10px; 
-            border-radius: 20px; 
-            font-size: 0.8rem; 
-        }
-
-        /* Grid de Resultados */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-        }
-        .image-card {
-            background: var(--card-bg);
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
         }
-        .image-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .img-container { 
-            width: 100%; 
-            aspect-ratio: 1/1; 
-            background: #f1f3f4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            cursor: zoom-in;
-        }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { padding: 10px; flex: 1; display: flex; flex-direction: column; }
-        .card-title { font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; height: 2.6em; overflow: hidden; color: #5f6368; }
-        .btn-sm { padding: 6px 12px; font-size: 0.8rem; width: 100%; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-primary:hover { background: #1a73e8; }
 
-        /* Estados */
-        #loader { display: none; text-align: center; padding: 40px; }
-        .progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin: 15px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        /* App Principal */
+        #mainApp { display: none; }
         
-        .error-msg { color: var(--error); background: #fce8e6; padding: 15px; border-radius: 4px; margin-bottom: 20px; display: none; }
+        header { text-align: center; margin-bottom: 30px; padding: 20px 0; border-bottom: 1px solid #eee; }
+        header h1 { font-size: 24px; color: var(--primary); }
 
-        @media (max-width: 600px) {
-            .config-grid { grid-template-columns: 1fr; }
-            .search-actions { flex-direction: column; }
-            .btn { width: 100%; }
-        }
+        .search-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        textarea { width: 100%; height: 100px; padding: 15px; border: 1px solid #dadce0; border-radius: 8px; resize: none; margin-bottom: 15px; font-size: 15px; }
+        
+        .actions { display: flex; gap: 10px; }
+        .btn-search { flex: 2; background: var(--primary); color: white; }
+        .btn-download { flex: 1; background: var(--success); color: white; }
+        .btn-download:disabled { background: #ccc; cursor: not-allowed; }
+
+        .topic-section { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .topic-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f1f3f4; padding-bottom: 10px; }
+        .topic-header h3 { color: #3c4043; text-transform: capitalize; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .img-card { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 4/3; background: #eee; }
+        .img-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .img-card:hover img { transform: scale(1.05); }
+
+        #loader { display: none; text-align: center; padding: 20px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .error-banner { background: #fce8e6; color: #d93025; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; display: none; white-space: pre-wrap; }
+        
+        .nav-btns { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; }
+        .btn-mini { padding: 5px 10px; font-size: 12px; background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 800px; margin: 0 auto;">
-            <div style="flex: 1;"></div>
-            <div style="flex: 2; text-align: center;">
-                <h1>Buscador Visual Educativo</h1>
-                <p>Investigación Multi-tema para Alumnos</p>
-            </div>
-            <div style="flex: 1; text-align: right;">
-                <button onclick="toggleConfig()" style="background: none; border: none; cursor: pointer; font-size: 20px;" title="Configuración">⚙️</button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Panel de Configuración (Oculto por defecto) -->
-    <details class="config-panel" id="configPanel">
-        <summary>⚙️ Configuración de Emergencia</summary>
-        
-        <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 11px; border-left: 4px solid #4285f4;">
-            <strong>Estado Actual:</strong><br>
-            🔑 Llave activa: <span id="statusKey">Cargando...</span><br>
-            🆔 Buscador: <span id="statusCX">Cargando...</span>
-        </div>
-
-        <div class="config-grid">
-            <div class="input-group">
-                <label for="apiKey">Google API Key (Nueva)</label>
-                <input type="password" id="apiKey" placeholder="Pega aquí la NUEVA clave de API">
-            </div>
-            <div class="input-group">
-                <label for="cx">CX (Search Engine ID)</label>
-                <input type="text" id="cx">
-            </div>
-        </div>
-        <div style="margin-top: 10px; display: flex; gap: 10px;">
-            <button onclick="resetConfig()" class="btn" style="background: #eee; color: #333; font-size: 12px; padding: 5px 10px;">Restablecer Fábrica</button>
-            <button onclick="testAPI()" class="btn" style="background: #34a853; color: white; font-size: 12px; padding: 5px 10px;">Probar Conexión</button>
-        </div>
-        <p style="font-size: 11px; margin-top: 10px; color: #666;">
-            <strong>¿Sigue fallando?</strong><br>
-            1. Ve a <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #4285f4;">Google Cloud</a>.<br>
-            2. Crea una <strong>NUEVA</strong> Clave de API.<br>
-            3. Pégala aquí arriba y dale a "Probar Conexión".
-        </p>
-    </details>
-
-    <!-- Barra de Búsqueda Multi-tema -->
-    <div class="search-container">
-        <label for="searchInput">Introduce los temas de estudio:</label>
-        <textarea id="searchInput" placeholder="Ej: Sistema Solar, Célula animal, Volcanes de México (Separa con comas, saltos de línea o doble espacio)"></textarea>
-        <div class="search-actions">
-            <button class="btn btn-primary" id="searchBtn">🔍 Buscar todos los temas</button>
-            <button class="btn btn-download-all" id="downloadAllBtn" disabled>📦 Descargar TODO (.zip)</button>
+    <!-- Pantalla de Configuración Inicial -->
+    <div id="setupScreen">
+        <div class="setup-card">
+            <img src="https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" style="height: 30px; margin-bottom: 20px;">
+            <h2>Configuración del Buscador</h2>
+            <p>Para que la app funcione, pega la <strong>API Key</strong> y el <strong>CX</strong> que funcionaron en tu prueba de Claude.</p>
+            
+            <input type="password" id="setupKey" placeholder="Pega aquí tu API Key (AIza...)">
+            <input type="text" id="setupCX" placeholder="Pega aquí tu CX (Search Engine ID)">
+            
+            <button class="btn btn-primary" onclick="saveAndStart()">🚀 Guardar y Empezar</button>
+            
+            <p style="margin-top: 20px; font-size: 12px;">
+                <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Obtener API Key</a> | 
+                <a href="https://programmablesearchengine.google.com/controlpanel/all" target="_blank">Obtener CX</a>
+            </p>
         </div>
     </div>
 
-    <!-- Mensajes de Error -->
-    <div id="errorBox" class="error-msg" style="white-space: pre-wrap; font-family: monospace; font-size: 12px;"></div>
+    <!-- Aplicación Principal -->
+    <div id="mainApp">
+        <div class="nav-btns">
+            <button class="btn-mini" onclick="logout()">🔑 Cambiar Llaves</button>
+        </div>
 
-    <!-- Loader -->
-    <div id="loader">
-        <div class="spinner"></div>
-        <p id="loaderText">Procesando temas...</p>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <header>
+            <h1>Buscador Escolar Pro</h1>
+            <p>Investigación Multi-tema para Alumnos</p>
+        </header>
+
+        <div id="errorBanner" class="error-banner"></div>
+
+        <div class="search-box">
+            <textarea id="topicsInput" placeholder="Escribe tus temas aquí (ej: Sistema Solar, Célula animal, Volcanes)..."></textarea>
+            <div class="actions">
+                <button class="btn btn-search" id="searchBtn">🔍 Buscar Imágenes</button>
+                <button class="btn btn-download" id="downloadBtn" disabled>📦 Descargar Todo (.zip)</button>
+            </div>
+        </div>
+
+        <div id="loader">
+            <div class="spinner"></div>
+            <p id="loaderText">Buscando...</p>
+        </div>
+
+        <div id="results"></div>
     </div>
-
-    <!-- Contenedor de Resultados -->
-    <div id="resultsContainer"></div>
 </div>
 
 <script>
-    // DATOS INTERNOS HARDCODEADOS (LOS TUYOS)
-    const DEFAULT_API_KEY = 'AIzaSyDB-aywC2WgspYgKetpEQLxu1aYHlA3OrM';
-    const DEFAULT_CX = 'f44cb7e6ece8d402c';
-
-    const apiKeyInput = document.getElementById('apiKey');
-    const cxInput = document.getElementById('cx');
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const downloadAllBtn = document.getElementById('downloadAllBtn');
-    const resultsContainer = document.getElementById('resultsContainer');
+    const setupScreen = document.getElementById('setupScreen');
+    const mainApp = document.getElementById('mainApp');
+    const errorBanner = document.getElementById('errorBanner');
+    const resultsContainer = document.getElementById('results');
     const loader = document.getElementById('loader');
     const loaderText = document.getElementById('loaderText');
-    const progressFill = document.getElementById('progressFill');
-    const errorBox = document.getElementById('errorBox');
-    const statusKey = document.getElementById('statusKey');
-    const statusCX = document.getElementById('statusCX');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-    let allResults = []; // [{ topic: '...', items: [...] }]
+    let currentKey = '';
+    let currentCX = '';
+    let allResults = [];
 
+    // Al cargar, verificar si ya hay llaves guardadas
     window.onload = () => {
-        updateStatus();
+        const savedKey = localStorage.getItem('school_api_key');
+        const savedCX = localStorage.getItem('school_cx');
+        
+        if (savedKey && savedCX) {
+            currentKey = savedKey;
+            currentCX = savedCX;
+            showApp();
+        }
     };
 
-    function updateStatus() {
-        const key = localStorage.getItem('gcs_api_key') || DEFAULT_API_KEY;
-        const cx = localStorage.getItem('gcs_cx') || DEFAULT_CX;
-        
-        apiKeyInput.value = key;
-        cxInput.value = cx;
-        
-        statusKey.textContent = key.substring(0, 6) + "..." + key.substring(key.length - 4);
-        statusCX.textContent = cx;
+    function saveAndStart() {
+        const key = document.getElementById('setupKey').value.trim();
+        const cx = document.getElementById('setupCX').value.trim();
+
+        if (!key || !cx) return alert('Por favor, completa ambos campos.');
+
+        localStorage.setItem('school_api_key', key);
+        localStorage.setItem('school_cx', cx);
+        currentKey = key;
+        currentCX = cx;
+        showApp();
     }
 
-    function toggleConfig() {
-        const panel = document.getElementById('configPanel');
-        panel.open = !panel.open;
+    function showApp() {
+        setupScreen.style.display = 'none';
+        mainApp.style.display = 'block';
     }
 
-    function resetConfig() {
-        if(confirm('¿Seguro que quieres borrar todo y empezar de cero?')) {
+    function logout() {
+        if(confirm('¿Quieres cambiar las llaves de configuración?')) {
             localStorage.clear();
             location.reload();
         }
     }
 
-    async function testAPI() {
-        const key = apiKeyInput.value.trim();
-        const cx = cxInput.value.trim();
-        
-        // Forzamos el guardado inmediato
-        localStorage.setItem('gcs_api_key', key);
-        localStorage.setItem('gcs_cx', cx);
-        updateStatus();
-
-        errorBox.style.display = 'block';
-        errorBox.style.background = '#fce8e6';
-        errorBox.style.color = '#d93025';
-        errorBox.textContent = "⏳ Probando conexión con la clave proporcionada...";
-        
-        try {
-            // Añadimos un timestamp para evitar caché de red
-            const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&q=test&searchType=image&num=1&timestamp=${Date.now()}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data.error) {
-                errorBox.textContent = "❌ ERROR DE GOOGLE:\n" + JSON.stringify(data.error, null, 2);
-                console.error("Detalle del error:", data.error);
-            } else {
-                errorBox.style.background = "#d4edda";
-                errorBox.style.color = "#155724";
-                errorBox.textContent = "✅ ¡CONEXIÓN EXITOSA! Esta clave funciona perfectamente. Ya puedes cerrar este panel y buscar tus temas.";
-                // Si funciona, nos aseguramos de que el buscador use esta
-                apiKeyInput.value = key;
-                cxInput.value = cx;
-            }
-        } catch (e) {
-            errorBox.textContent = "❌ ERROR DE RED:\n" + e.message;
-        }
+    function getTopics(text) {
+        return text.split(/,|\n|  +/).map(t => t.trim()).filter(t => t.length > 0);
     }
 
-    // Función para limpiar y separar temas
-    function getTopics(input) {
-        return input.split(/,|\n|  +/)
-            .map(t => t.trim())
-            .filter(t => t.length > 0);
-    }
-
-    searchBtn.onclick = async () => {
-        const rawInput = searchInput.value.trim();
-        const key = apiKeyInput.value.trim();
-        const cx = cxInput.value.trim();
-        const topics = getTopics(rawInput);
-
-        if (topics.length === 0) return alert('Por favor, escribe al menos un tema.');
-        
-        localStorage.setItem('gcs_api_key', key);
-        localStorage.setItem('gcs_cx', cx);
-        updateStatus();
+    document.getElementById('searchBtn').onclick = async () => {
+        const topics = getTopics(document.getElementById('topicsInput').value);
+        if (topics.length === 0) return alert('Escribe al menos un tema.');
 
         resultsContainer.innerHTML = '';
-        errorBox.style.display = 'none';
+        errorBanner.style.display = 'none';
         loader.style.display = 'block';
-        downloadAllBtn.disabled = true;
+        downloadBtn.disabled = true;
         allResults = [];
-        progressFill.style.width = '0%';
 
         for (let i = 0; i < topics.length; i++) {
             const topic = topics[i];
-            loaderText.textContent = `Buscando: "${topic}" (${i + 1} de ${topics.length})`;
-            progressFill.style.width = `${((i) / topics.length) * 100}%`;
+            loaderText.textContent = `Buscando "${topic}" (${i+1}/${topics.length})...`;
 
             try {
-                const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&q=${encodeURIComponent(topic)}&searchType=image&num=10`;
+                const url = `https://www.googleapis.com/customsearch/v1?key=${currentKey}&cx=${currentCX}&q=${encodeURIComponent(topic)}&searchType=image&num=10`;
                 const response = await fetch(url);
                 const data = await response.json();
 
                 if (data.error) {
-                    throw new Error(`Google dice: ${data.error.message} (Código: ${data.error.status})`);
+                    throw new Error(`Google dice: ${data.error.message} (${data.error.status})`);
                 }
 
                 if (data.items && data.items.length > 0) {
                     allResults.push({ topic, items: data.items });
-                    renderTopicSection(topic, data.items);
+                    renderTopic(topic, data.items);
                 } else {
-                    const infoDiv = document.createElement('div');
-                    infoDiv.className = 'error-msg';
-                    infoDiv.style.background = '#e8f0fe';
-                    infoDiv.style.color = '#1967d2';
-                    infoDiv.style.display = 'block';
-                    infoDiv.textContent = `No se encontraron imágenes para "${topic}". Revisa que "Buscar en toda la Web" esté ON en cse.google.com`;
-                    resultsContainer.appendChild(infoDiv);
+                    renderEmpty(topic);
                 }
             } catch (err) {
-                const errDiv = document.createElement('div');
-                errDiv.className = 'error-msg';
-                errDiv.style.display = 'block';
-                errDiv.textContent = `Error en "${topic}": ${err.message}`;
-                resultsContainer.appendChild(errDiv);
+                showError(`Error en "${topic}": ${err.message}`);
             }
         }
 
-        progressFill.style.width = '100%';
         loader.style.display = 'none';
-        if (allResults.length > 0) downloadAllBtn.disabled = false;
+        if (allResults.length > 0) downloadBtn.disabled = false;
     };
 
-    function renderTopicSection(topic, items) {
-        const section = document.createElement('section');
+    function renderTopic(topic, items) {
+        const section = document.createElement('div');
         section.className = 'topic-section';
-        
         section.innerHTML = `
             <div class="topic-header">
-                <h2>${topic}</h2>
-                <span class="topic-badge">10 imágenes</span>
+                <h3>${topic}</h3>
+                <span style="font-size: 12px; color: #666;">${items.length} imágenes</span>
             </div>
-            <div class="results-grid"></div>
+            <div class="grid">
+                ${items.map(img => `
+                    <div class="img-card">
+                        <img src="${img.link}" alt="${topic}" onerror="this.src='https://via.placeholder.com/200?text=Error+Carga'">
+                    </div>
+                `).join('')}
+            </div>
         `;
-
-        const grid = section.querySelector('.results-grid');
-
-        items.forEach((item, index) => {
-            const extension = item.link.split('.').pop().split(/[#?]/)[0] || 'jpg';
-            const filename = `${topic.replace(/\s+/g, '_')}_${index + 1}.${extension}`;
-
-            const card = document.createElement('div');
-            card.className = 'image-card';
-            card.innerHTML = `
-                <div class="img-container" onclick="window.open('${item.link}', '_blank')">
-                    <img src="${item.link}" alt="${item.title}" loading="lazy">
-                </div>
-                <div class="card-info">
-                    <div class="card-title">${item.title}</div>
-                    <button class="btn btn-secondary btn-sm" onclick="downloadImage('${item.link}', '${filename}')">
-                        ⬇ Descargar
-                    </button>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-
         resultsContainer.appendChild(section);
     }
 
-    async function downloadImage(url, filename) {
-        try {
-            const response = await fetch(url, { mode: 'cors' });
-            if (!response.ok) throw new Error('CORS');
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            a.click();
-            window.URL.revokeObjectURL(blobUrl);
-        } catch (err) {
-            window.open(url, '_blank');
-        }
+    function renderEmpty(topic) {
+        const div = document.createElement('div');
+        div.style.padding = '15px';
+        div.style.color = '#666';
+        div.style.fontSize = '13px';
+        div.textContent = `⚠️ No se encontraron imágenes para "${topic}".`;
+        resultsContainer.appendChild(div);
     }
 
-    downloadAllBtn.onclick = async () => {
-        const zip = new JSZip();
-        downloadAllBtn.textContent = '📦 Generando ZIP...';
-        downloadAllBtn.disabled = true;
+    function showError(msg) {
+        errorBanner.style.display = 'block';
+        errorBanner.textContent += msg + '\n';
+    }
 
+    downloadBtn.onclick = async () => {
+        const zip = new JSZip();
+        downloadBtn.textContent = '⏳ Comprimiendo...';
+        
         for (const res of allResults) {
-            const folder = zip.folder(res.topic.replace(/\s+/g, '_'));
-            const promises = res.items.map(async (item, index) => {
+            const folder = zip.folder(res.topic.replace(/[^a-z0-9]/gi, '_'));
+            for (let i = 0; i < res.items.length; i++) {
                 try {
-                    const response = await fetch(item.link, { mode: 'cors' });
-                    if (response.ok) {
-                        const blob = await response.blob();
-                        const ext = item.link.split('.').pop().split(/[#?]/)[0] || 'jpg';
-                        folder.file(`imagen_${index + 1}.${ext}`, blob);
-                    }
-                } catch (e) {}
-            });
-            await Promise.all(promises);
+                    const imgUrl = res.items[i].link;
+                    const response = await fetch(imgUrl);
+                    const blob = await response.blob();
+                    const ext = imgUrl.split('.').pop().split(/[?#]/)[0] || 'jpg';
+                    folder.file(`imagen_${i+1}.${ext}`, blob);
+                } catch (e) {
+                    console.warn('No se pudo descargar una imagen');
+                }
+            }
         }
 
-        const content = await zip.generateAsync({ type: "blob" });
-        const blobUrl = window.URL.createObjectURL(content);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = `investigacion_escolar_${new Date().getTime()}.zip`;
-        a.click();
-        window.URL.revokeObjectURL(blobUrl);
-        
-        downloadAllBtn.textContent = '📦 Descargar TODO (.zip)';
-        downloadAllBtn.disabled = false;
+        zip.generateAsync({type:"blob"}).then(function(content) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = "investigacion_escolar.zip";
+            link.click();
+            downloadBtn.textContent = '📦 Descargar Todo (.zip)';
+        });
     };
 </script>
-</body>
-</html>
-
 </body>
 </html>
