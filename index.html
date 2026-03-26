@@ -151,23 +151,48 @@
 
 <div class="container">
     <header>
-        <h1>Buscador Visual Educativo</h1>
-        <p>Investigación Multi-tema para Alumnos</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 800px; margin: 0 auto;">
+            <div style="flex: 1;"></div>
+            <div style="flex: 2; text-align: center;">
+                <h1>Buscador Visual Educativo</h1>
+                <p>Investigación Multi-tema para Alumnos</p>
+            </div>
+            <div style="flex: 1; text-align: right;">
+                <button onclick="toggleConfig()" style="background: none; border: none; cursor: pointer; font-size: 20px;" title="Configuración">⚙️</button>
+            </div>
+        </div>
     </header>
 
-    <!-- Panel de Configuración -->
+    <!-- Panel de Configuración (Oculto por defecto) -->
     <details class="config-panel" id="configPanel">
-        <summary>⚙️ Configuración de API (Requerido)</summary>
+        <summary>⚙️ Configuración de Emergencia</summary>
+        
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 11px; border-left: 4px solid #4285f4;">
+            <strong>Estado Actual:</strong><br>
+            🔑 Llave activa: <span id="statusKey">Cargando...</span><br>
+            🆔 Buscador: <span id="statusCX">Cargando...</span>
+        </div>
+
         <div class="config-grid">
             <div class="input-group">
-                <label for="apiKey">Google API Key</label>
-                <input type="password" id="apiKey" placeholder="Tu API Key de Google Cloud">
+                <label for="apiKey">Google API Key (Nueva)</label>
+                <input type="password" id="apiKey" placeholder="Pega aquí la NUEVA clave de API">
             </div>
             <div class="input-group">
                 <label for="cx">CX (Search Engine ID)</label>
-                <input type="text" id="cx" placeholder="ID de tu buscador programable">
+                <input type="text" id="cx">
             </div>
         </div>
+        <div style="margin-top: 10px; display: flex; gap: 10px;">
+            <button onclick="resetConfig()" class="btn" style="background: #eee; color: #333; font-size: 12px; padding: 5px 10px;">Restablecer Fábrica</button>
+            <button onclick="testAPI()" class="btn" style="background: #34a853; color: white; font-size: 12px; padding: 5px 10px;">Probar Conexión</button>
+        </div>
+        <p style="font-size: 11px; margin-top: 10px; color: #666;">
+            <strong>¿Sigue fallando?</strong><br>
+            1. Ve a <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #4285f4;">Google Cloud</a>.<br>
+            2. Crea una <strong>NUEVA</strong> Clave de API.<br>
+            3. Pégala aquí arriba y dale a "Probar Conexión".
+        </p>
     </details>
 
     <!-- Barra de Búsqueda Multi-tema -->
@@ -181,7 +206,7 @@
     </div>
 
     <!-- Mensajes de Error -->
-    <div id="errorBox" class="error-msg"></div>
+    <div id="errorBox" class="error-msg" style="white-space: pre-wrap; font-family: monospace; font-size: 12px;"></div>
 
     <!-- Loader -->
     <div id="loader">
@@ -195,6 +220,10 @@
 </div>
 
 <script>
+    // DATOS INTERNOS HARDCODEADOS (LOS TUYOS)
+    const DEFAULT_API_KEY = 'AIzaSyDB-aywC2WgspYgKetpEQLxu1aYHlA3OrM';
+    const DEFAULT_CX = 'f44cb7e6ece8d402c';
+
     const apiKeyInput = document.getElementById('apiKey');
     const cxInput = document.getElementById('cx');
     const searchInput = document.getElementById('searchInput');
@@ -205,25 +234,76 @@
     const loaderText = document.getElementById('loaderText');
     const progressFill = document.getElementById('progressFill');
     const errorBox = document.getElementById('errorBox');
+    const statusKey = document.getElementById('statusKey');
+    const statusCX = document.getElementById('statusCX');
 
     let allResults = []; // [{ topic: '...', items: [...] }]
 
     window.onload = () => {
-        apiKeyInput.value = localStorage.getItem('gcs_api_key') || '';
-        cxInput.value = localStorage.getItem('gcs_cx') || '';
-        if (!apiKeyInput.value || !cxInput.value) document.getElementById('configPanel').open = true;
+        updateStatus();
     };
 
-    [apiKeyInput, cxInput].forEach(el => {
-        el.addEventListener('input', () => {
-            localStorage.setItem('gcs_api_key', apiKeyInput.value);
-            localStorage.setItem('gcs_cx', cxInput.value);
-        });
-    });
+    function updateStatus() {
+        const key = localStorage.getItem('gcs_api_key') || DEFAULT_API_KEY;
+        const cx = localStorage.getItem('gcs_cx') || DEFAULT_CX;
+        
+        apiKeyInput.value = key;
+        cxInput.value = cx;
+        
+        statusKey.textContent = key.substring(0, 6) + "..." + key.substring(key.length - 4);
+        statusCX.textContent = cx;
+    }
+
+    function toggleConfig() {
+        const panel = document.getElementById('configPanel');
+        panel.open = !panel.open;
+    }
+
+    function resetConfig() {
+        if(confirm('¿Seguro que quieres borrar todo y empezar de cero?')) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    async function testAPI() {
+        const key = apiKeyInput.value.trim();
+        const cx = cxInput.value.trim();
+        
+        // Forzamos el guardado inmediato
+        localStorage.setItem('gcs_api_key', key);
+        localStorage.setItem('gcs_cx', cx);
+        updateStatus();
+
+        errorBox.style.display = 'block';
+        errorBox.style.background = '#fce8e6';
+        errorBox.style.color = '#d93025';
+        errorBox.textContent = "⏳ Probando conexión con la clave proporcionada...";
+        
+        try {
+            // Añadimos un timestamp para evitar caché de red
+            const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&q=test&searchType=image&num=1&timestamp=${Date.now()}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.error) {
+                errorBox.textContent = "❌ ERROR DE GOOGLE:\n" + JSON.stringify(data.error, null, 2);
+                console.error("Detalle del error:", data.error);
+            } else {
+                errorBox.style.background = "#d4edda";
+                errorBox.style.color = "#155724";
+                errorBox.textContent = "✅ ¡CONEXIÓN EXITOSA! Esta clave funciona perfectamente. Ya puedes cerrar este panel y buscar tus temas.";
+                // Si funciona, nos aseguramos de que el buscador use esta
+                apiKeyInput.value = key;
+                cxInput.value = cx;
+            }
+        } catch (e) {
+            errorBox.textContent = "❌ ERROR DE RED:\n" + e.message;
+        }
+    }
 
     // Función para limpiar y separar temas
     function getTopics(input) {
-        // Separa por coma, salto de línea o 2+ espacios
         return input.split(/,|\n|  +/)
             .map(t => t.trim())
             .filter(t => t.length > 0);
@@ -236,12 +316,11 @@
         const topics = getTopics(rawInput);
 
         if (topics.length === 0) return alert('Por favor, escribe al menos un tema.');
-        if (!key || !cx) {
-            document.getElementById('configPanel').open = true;
-            return alert('Configura tu API Key y CX primero.');
-        }
+        
+        localStorage.setItem('gcs_api_key', key);
+        localStorage.setItem('gcs_cx', cx);
+        updateStatus();
 
-        // Reset UI
         resultsContainer.innerHTML = '';
         errorBox.style.display = 'none';
         loader.style.display = 'block';
@@ -259,18 +338,27 @@
                 const response = await fetch(url);
                 const data = await response.json();
 
-                if (data.error) throw new Error(data.error.message);
+                if (data.error) {
+                    throw new Error(`Google dice: ${data.error.message} (Código: ${data.error.status})`);
+                }
 
                 if (data.items && data.items.length > 0) {
                     allResults.push({ topic, items: data.items });
                     renderTopicSection(topic, data.items);
+                } else {
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'error-msg';
+                    infoDiv.style.background = '#e8f0fe';
+                    infoDiv.style.color = '#1967d2';
+                    infoDiv.style.display = 'block';
+                    infoDiv.textContent = `No se encontraron imágenes para "${topic}". Revisa que "Buscar en toda la Web" esté ON en cse.google.com`;
+                    resultsContainer.appendChild(infoDiv);
                 }
             } catch (err) {
-                console.error(`Error en tema "${topic}":`, err);
                 const errDiv = document.createElement('div');
                 errDiv.className = 'error-msg';
                 errDiv.style.display = 'block';
-                errDiv.textContent = `Error buscando "${topic}": ${err.message}`;
+                errDiv.textContent = `Error en "${topic}": ${err.message}`;
                 resultsContainer.appendChild(errDiv);
             }
         }
