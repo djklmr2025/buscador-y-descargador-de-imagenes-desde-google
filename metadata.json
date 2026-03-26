@@ -1,0 +1,5 @@
+{
+  "name": "Buscador Visual Google",
+  "description": "Buscador de imágenes profesional usando Google Custom Search API con descarga masiva en ZIP.",
+  "requestFramePermissions": []
+}
