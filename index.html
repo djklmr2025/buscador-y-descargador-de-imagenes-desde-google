@@ -14,6 +14,7 @@
             --bg: #f8f9fa;
             --text: #202124;
             --card-bg: #ffffff;
+            --separator: #dadce0;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,46 +43,69 @@
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
         .input-group { display: flex; flex-direction: column; }
         .input-group label { font-size: 0.85rem; margin-bottom: 5px; color: #5f6368; }
-        input { 
-            padding: 10px; 
+        input, textarea { 
+            padding: 12px; 
             border: 1px solid #dadce0; 
             border-radius: 4px; 
             font-size: 1rem;
             outline: none;
+            width: 100%;
         }
-        input:focus { border-color: var(--primary); }
+        input:focus, textarea:focus { border-color: var(--primary); }
 
-        /* Buscador */
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
+        /* Buscador Multi-tema */
+        .search-container {
             background: var(--card-bg);
-            padding: 10px;
-            border-radius: 50px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-        .search-bar input { flex: 1; border: none; padding-left: 20px; border-radius: 50px; }
+        .search-container label { display: block; margin-bottom: 10px; font-weight: 600; color: #3c4043; }
+        .search-container textarea { min-height: 80px; resize: vertical; margin-bottom: 15px; }
+        .search-actions { display: flex; gap: 10px; align-items: center; }
+
         .btn {
-            padding: 10px 25px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
         }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: var(--secondary); color: white; border-radius: 50px; }
-        .btn-download-all { background: #3c4043; color: white; margin-left: auto; }
+        .btn-primary { background: var(--primary); color: white; flex: 1; }
+        .btn-primary:hover { background: #3367d6; }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-download-all { background: #3c4043; color: white; }
+
+        /* Secciones por Tema */
+        .topic-section { margin-bottom: 50px; }
+        .topic-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+        .topic-header h2 { text-transform: capitalize; color: #3c4043; font-size: 1.4rem; }
+        .topic-badge { 
+            background: var(--primary); 
+            color: white; 
+            padding: 2px 10px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+        }
 
         /* Grid de Resultados */
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 20px;
         }
         .image-card {
@@ -93,41 +117,33 @@
             display: flex;
             flex-direction: column;
         }
-        .image-card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .image-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .img-container { 
             width: 100%; 
             aspect-ratio: 1/1; 
-            background: #eee;
+            background: #f1f3f4;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            cursor: zoom-in;
         }
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { padding: 12px; flex: 1; display: flex; flex-direction: column; }
-        .card-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 10px; height: 2.8em; overflow: hidden; }
-        .card-actions { margin-top: auto; }
-        .btn-sm { padding: 6px 12px; font-size: 0.85rem; width: 100%; justify-content: center; }
+        .card-info { padding: 10px; flex: 1; display: flex; flex-direction: column; }
+        .card-title { font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; height: 2.6em; overflow: hidden; color: #5f6368; }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; width: 100%; }
 
         /* Estados */
         #loader { display: none; text-align: center; padding: 40px; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin: 15px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
         
         .error-msg { color: var(--error); background: #fce8e6; padding: 15px; border-radius: 4px; margin-bottom: 20px; display: none; }
 
-        /* Responsive */
         @media (max-width: 600px) {
             .config-grid { grid-template-columns: 1fr; }
-            .search-bar { flex-direction: column; border-radius: 10px; }
-            .btn-download-all { margin-left: 0; width: 100%; }
+            .search-actions { flex-direction: column; }
+            .btn { width: 100%; }
         }
     </style>
 </head>
@@ -135,8 +151,8 @@
 
 <div class="container">
     <header>
-        <h1>Buscador Visual Google</h1>
-        <p>Google Custom Search JSON API</p>
+        <h1>Buscador Visual Educativo</h1>
+        <p>Investigación Multi-tema para Alumnos</p>
     </header>
 
     <!-- Panel de Configuración -->
@@ -152,16 +168,16 @@
                 <input type="text" id="cx" placeholder="ID de tu buscador programable">
             </div>
         </div>
-        <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">
-            * Los datos se guardan localmente en tu navegador (localStorage).
-        </p>
     </details>
 
-    <!-- Barra de Búsqueda -->
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="¿Qué quieres buscar? (ej. Paisajes de Islandia)">
-        <button class="btn btn-primary" id="searchBtn">🔍 Buscar</button>
-        <button class="btn btn-download-all" id="downloadAllBtn" disabled>📦 Descargar todas (.zip)</button>
+    <!-- Barra de Búsqueda Multi-tema -->
+    <div class="search-container">
+        <label for="searchInput">Introduce los temas de estudio:</label>
+        <textarea id="searchInput" placeholder="Ej: Sistema Solar, Célula animal, Volcanes de México (Separa con comas, saltos de línea o doble espacio)"></textarea>
+        <div class="search-actions">
+            <button class="btn btn-primary" id="searchBtn">🔍 Buscar todos los temas</button>
+            <button class="btn btn-download-all" id="downloadAllBtn" disabled>📦 Descargar TODO (.zip)</button>
+        </div>
     </div>
 
     <!-- Mensajes de Error -->
@@ -170,38 +186,34 @@
     <!-- Loader -->
     <div id="loader">
         <div class="spinner"></div>
-        <p>Buscando imágenes increíbles...</p>
+        <p id="loaderText">Procesando temas...</p>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     </div>
 
-    <!-- Grid de Resultados -->
-    <div class="results-grid" id="resultsGrid"></div>
+    <!-- Contenedor de Resultados -->
+    <div id="resultsContainer"></div>
 </div>
 
 <script>
-    /**
-     * Lógica de la Aplicación
-     */
     const apiKeyInput = document.getElementById('apiKey');
     const cxInput = document.getElementById('cx');
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
     const downloadAllBtn = document.getElementById('downloadAllBtn');
-    const resultsGrid = document.getElementById('resultsGrid');
+    const resultsContainer = document.getElementById('resultsContainer');
     const loader = document.getElementById('loader');
+    const loaderText = document.getElementById('loaderText');
+    const progressFill = document.getElementById('progressFill');
     const errorBox = document.getElementById('errorBox');
 
-    let currentImages = []; // Almacena los resultados actuales para el ZIP
+    let allResults = []; // [{ topic: '...', items: [...] }]
 
-    // Cargar configuración inicial
     window.onload = () => {
         apiKeyInput.value = localStorage.getItem('gcs_api_key') || '';
         cxInput.value = localStorage.getItem('gcs_cx') || '';
-        if (!apiKeyInput.value || !cxInput.value) {
-            document.getElementById('configPanel').open = true;
-        }
+        if (!apiKeyInput.value || !cxInput.value) document.getElementById('configPanel').open = true;
     };
 
-    // Guardar configuración al cambiar
     [apiKeyInput, cxInput].forEach(el => {
         el.addEventListener('input', () => {
             localStorage.setItem('gcs_api_key', apiKeyInput.value);
@@ -209,147 +221,152 @@
         });
     });
 
-    // Ejecutar búsqueda
+    // Función para limpiar y separar temas
+    function getTopics(input) {
+        // Separa por coma, salto de línea o 2+ espacios
+        return input.split(/,|\n|  +/)
+            .map(t => t.trim())
+            .filter(t => t.length > 0);
+    }
+
     searchBtn.onclick = async () => {
-        const query = searchInput.value.trim();
+        const rawInput = searchInput.value.trim();
         const key = apiKeyInput.value.trim();
         const cx = cxInput.value.trim();
+        const topics = getTopics(rawInput);
 
-        if (!query) return alert('Por favor, escribe algo para buscar.');
+        if (topics.length === 0) return alert('Por favor, escribe al menos un tema.');
         if (!key || !cx) {
             document.getElementById('configPanel').open = true;
             return alert('Configura tu API Key y CX primero.');
         }
 
         // Reset UI
-        resultsGrid.innerHTML = '';
+        resultsContainer.innerHTML = '';
         errorBox.style.display = 'none';
         loader.style.display = 'block';
         downloadAllBtn.disabled = true;
-        currentImages = [];
+        allResults = [];
+        progressFill.style.width = '0%';
 
-        try {
-            const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&q=${encodeURIComponent(query)}&searchType=image&num=10`;
-            const response = await fetch(url);
-            const data = await response.json();
+        for (let i = 0; i < topics.length; i++) {
+            const topic = topics[i];
+            loaderText.textContent = `Buscando: "${topic}" (${i + 1} de ${topics.length})`;
+            progressFill.style.width = `${((i) / topics.length) * 100}%`;
 
-            if (data.error) {
-                throw new Error(data.error.message || 'Error en la API de Google');
+            try {
+                const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&q=${encodeURIComponent(topic)}&searchType=image&num=10`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error.message);
+
+                if (data.items && data.items.length > 0) {
+                    allResults.push({ topic, items: data.items });
+                    renderTopicSection(topic, data.items);
+                }
+            } catch (err) {
+                console.error(`Error en tema "${topic}":`, err);
+                const errDiv = document.createElement('div');
+                errDiv.className = 'error-msg';
+                errDiv.style.display = 'block';
+                errDiv.textContent = `Error buscando "${topic}": ${err.message}`;
+                resultsContainer.appendChild(errDiv);
             }
-
-            if (!data.items || data.items.length === 0) {
-                errorBox.textContent = 'No se encontraron imágenes para esta búsqueda.';
-                errorBox.style.display = 'block';
-            } else {
-                currentImages = data.items;
-                renderImages(data.items);
-                downloadAllBtn.disabled = false;
-            }
-        } catch (err) {
-            errorBox.textContent = 'Error: ' + err.message;
-            errorBox.style.display = 'block';
-        } finally {
-            loader.style.display = 'none';
         }
+
+        progressFill.style.width = '100%';
+        loader.style.display = 'none';
+        if (allResults.length > 0) downloadAllBtn.disabled = false;
     };
 
-    // Renderizar tarjetas de imagen
-    function renderImages(items) {
+    function renderTopicSection(topic, items) {
+        const section = document.createElement('section');
+        section.className = 'topic-section';
+        
+        section.innerHTML = `
+            <div class="topic-header">
+                <h2>${topic}</h2>
+                <span class="topic-badge">10 imágenes</span>
+            </div>
+            <div class="results-grid"></div>
+        `;
+
+        const grid = section.querySelector('.results-grid');
+
         items.forEach((item, index) => {
+            const extension = item.link.split('.').pop().split(/[#?]/)[0] || 'jpg';
+            const filename = `${topic.replace(/\s+/g, '_')}_${index + 1}.${extension}`;
+
             const card = document.createElement('div');
             card.className = 'image-card';
-            
-            // Extraer extensión del link o usar jpg por defecto
-            const extension = item.link.split('.').pop().split(/[#?]/)[0] || 'jpg';
-            const filename = `imagen-${index + 1}.${extension}`;
-
             card.innerHTML = `
-                <div class="img-container">
-                    <img src="${item.link}" alt="${item.title}" loading="lazy" title="Clic derecho para guardar como...">
+                <div class="img-container" onclick="window.open('${item.link}', '_blank')">
+                    <img src="${item.link}" alt="${item.title}" loading="lazy">
                 </div>
                 <div class="card-info">
                     <div class="card-title">${item.title}</div>
-                    <div class="card-actions">
-                        <button class="btn btn-secondary btn-sm" onclick="downloadImage('${item.link}', '${filename}')">
-                            ⬇ Descargar
-                        </button>
-                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="downloadImage('${item.link}', '${filename}')">
+                        ⬇ Descargar
+                    </button>
                 </div>
             `;
-            resultsGrid.appendChild(card);
+            grid.appendChild(card);
         });
+
+        resultsContainer.appendChild(section);
     }
 
-    /**
-     * Descarga individual mediante Blob
-     * Intenta saltar CORS. Si falla, abre la imagen en pestaña nueva.
-     */
     async function downloadImage(url, filename) {
         try {
             const response = await fetch(url, { mode: 'cors' });
-            if (!response.ok) throw new Error('CORS Blocked');
-            
+            if (!response.ok) throw new Error('CORS');
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
-            
             const a = document.createElement('a');
             a.href = blobUrl;
             a.download = filename;
-            document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
             window.URL.revokeObjectURL(blobUrl);
         } catch (err) {
-            console.warn('Descarga directa fallida (CORS). Abriendo en pestaña nueva.', err);
-            // Fallback: Abrir en pestaña nueva si el fetch falla por CORS
             window.open(url, '_blank');
-            alert('El servidor de la imagen bloquea la descarga directa por seguridad. Se ha abierto la imagen en una pestaña nueva: haz clic derecho y "Guardar como".');
         }
     }
 
-    /**
-     * Descarga masiva ZIP
-     */
     downloadAllBtn.onclick = async () => {
         const zip = new JSZip();
-        const folder = zip.folder("imagenes_busqueda");
-        
-        downloadAllBtn.textContent = '📦 Procesando...';
+        downloadAllBtn.textContent = '📦 Generando ZIP...';
         downloadAllBtn.disabled = true;
 
-        const downloadPromises = currentImages.map(async (item, index) => {
-            try {
-                const response = await fetch(item.link, { mode: 'cors' });
-                if (!response.ok) return null;
-                const blob = await response.blob();
-                const extension = item.link.split('.').pop().split(/[#?]/)[0] || 'jpg';
-                folder.file(`imagen-${index + 1}.${extension}`, blob);
-            } catch (e) {
-                console.error(`Error descargando ${item.link} para el ZIP`, e);
-            }
-        });
+        for (const res of allResults) {
+            const folder = zip.folder(res.topic.replace(/\s+/g, '_'));
+            const promises = res.items.map(async (item, index) => {
+                try {
+                    const response = await fetch(item.link, { mode: 'cors' });
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const ext = item.link.split('.').pop().split(/[#?]/)[0] || 'jpg';
+                        folder.file(`imagen_${index + 1}.${ext}`, blob);
+                    }
+                } catch (e) {}
+            });
+            await Promise.all(promises);
+        }
 
-        await Promise.all(downloadPromises);
-
-        zip.generateAsync({ type: "blob" }).then(function(content) {
-            const zipName = `busqueda-${searchInput.value.replace(/\s+/g, '_')}.zip`;
-            const blobUrl = window.URL.createObjectURL(content);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = zipName;
-            a.click();
-            window.URL.revokeObjectURL(blobUrl);
-            
-            downloadAllBtn.textContent = '📦 Descargar todas (.zip)';
-            downloadAllBtn.disabled = false;
-        });
+        const content = await zip.generateAsync({ type: "blob" });
+        const blobUrl = window.URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `investigacion_escolar_${new Date().getTime()}.zip`;
+        a.click();
+        window.URL.revokeObjectURL(blobUrl);
+        
+        downloadAllBtn.textContent = '📦 Descargar TODO (.zip)';
+        downloadAllBtn.disabled = false;
     };
-
-    // Permitir buscar con Enter
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') searchBtn.click();
-    });
 </script>
+</body>
+</html>
 
 </body>
 </html>

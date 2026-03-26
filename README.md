@@ -27,10 +27,10 @@ Para que el buscador funcione, se requieren dos valores que deben configurarse e
 *   **Persistencia**: Utiliza `localStorage` (`gcs_api_key` y `gcs_cx`) para mantener las credenciales entre sesiones sin necesidad de base de datos.
 
 ### Flujo de Datos
-1.  **Búsqueda**: Realiza un `fetch` a la API de Google con el parámetro `searchType=image`.
-2.  **Renderizado**: Genera un grid dinámico de tarjetas con previsualización y metadatos.
-3.  **Descarga Individual**: Utiliza un flujo de `Blob` para intentar forzar la descarga local. Si el servidor de origen bloquea por CORS, implementa un fallback automático que abre la imagen en una pestaña nueva.
-4.  **Descarga Masiva**: Itera sobre los resultados actuales, descarga los blobs en paralelo y genera un archivo `.zip` dinámicamente.
+1.  **Búsqueda Multi-tema**: Procesa una cadena de texto y la divide en un array de temas usando Regex (`/,|\n|  +/`).
+2.  **Procesamiento por Lotes**: Realiza llamadas secuenciales a la API de Google (10 resultados por tema) para evitar bloqueos de tasa (rate limiting).
+3.  **Renderizado por Secciones**: Crea nodos de sección independientes en el DOM para cada tema.
+4.  **Descarga Masiva Estructurada**: Utiliza `JSZip` para crear una estructura de directorios dentro del ZIP, organizando las imágenes por el nombre del tema correspondiente.
 
 ### Sugerencias de Integración Educativa
 *   **Estilos**: El CSS utiliza variables (`:root`) para colores primarios y secundarios. Puedes ajustarlas para que coincidan con la paleta de colores del ecosistema principal.
